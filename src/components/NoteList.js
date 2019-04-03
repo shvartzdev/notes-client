@@ -8,12 +8,35 @@ export default class NoteList extends Component {
     super(props);
     this.state = {
       notes: null,
+      editing: false,
     };
   }
 
   componentDidMount() {
     this.getNotes();
   }
+
+  onChange = (e) => {
+    this.setState({
+      title: e.target.value,
+    });
+  };
+
+  onCheck = (e, id) => {
+    const stateValue = this.state;
+    if (e.target.value === undefined && stateValue.title === '') alert('empty field');
+    else {
+      const index = stateValue.notes.findIndex(note => note.id === id);
+      const note = Object.assign({}, stateValue.notes[index]);
+      note.title = stateValue.title;
+      const newNotes = Object.assign([], stateValue.notes);
+      newNotes[index] = note;
+
+      this.setState({
+        notes: newNotes,
+      });
+    }
+  };
 
   getNotes = () => {
     fetch('https://private-9aad-note10.apiary-mock.com/notes')
@@ -26,15 +49,6 @@ export default class NoteList extends Component {
       .catch(error => console.log(error));
   }
 
-  handleFormChange = (value, field) => {
-    this.setState(prevState => ({
-      notes: {
-        ...prevState.notes,
-        [field]: value,
-      },
-    }));
-  };
-
   deleteNote = (id) => {
     const valueState = this.state;
     axios.delete(`https://private-9aad-note10.apiary-mock.com/notes/${id}`)
@@ -42,7 +56,6 @@ export default class NoteList extends Component {
         notes: [...valueState.notes.filter(note => note.id !== id)],
       }));
   };
-
 
   addNote = (title) => {
     const valueState = this.state;
@@ -57,15 +70,18 @@ export default class NoteList extends Component {
       }));
   };
 
-
   render() {
     const valueState = this.state;
+    const editStatus = valueState.editing;
     const notes = valueState.notes
       ? valueState.notes.map(note => (
         <NoteCard
           key={note.id}
           id={note.id}
           title={note.title}
+          editStatus={editStatus}
+          onChange={this.onChange}
+          onCheck={this.onCheck}
           deleteNote={this.deleteNote}
         />
       )) : <div>Loading notes</div>;
