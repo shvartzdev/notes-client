@@ -24,7 +24,7 @@ export default class NoteList extends Component {
 
   onCheck = (e, id) => {
     const stateValue = this.state;
-    if (e.target.value === undefined && stateValue.title === '') alert('empty field');
+    if (e.target.value === undefined || stateValue.title === '') alert('empty field');
     else {
       const index = stateValue.notes.findIndex(note => note.id === id);
       const note = Object.assign({}, stateValue.notes[index]);
